@@ -116,6 +116,15 @@ PACSTRAP_PACKAGES = [
     "base",
 ]
 
+# Installed in the same pacstrap run, before pacman is purged.
+EXTRA_PACKAGES = [
+    "nano",
+    "zsh",
+    "sudo",
+    "git",
+    "htop",
+    "less",
+]
 
 # ============================================================================
 # Color palette
@@ -137,28 +146,28 @@ YELLOW = "\033[1;33m"
 
 def info(*message: str) -> None:
     """Print an informational message."""
-    print(f"{BLUE}[INFO]{RESET} {WHITE}{message}{RESET}")
+    print(f"{BLUE}[INFO]{RESET} {WHITE}{' '.join(message)}{RESET}")
 
 
 def ok(*message: str) -> None:
     """Print a successful-operation message."""
-    print(f"{CYAN}[ OK ]{RESET} {WHITE}{message}{RESET}")
+    print(f"{CYAN}[ OK ]{RESET} {WHITE}{' '.join(message)}{RESET}")
 
 
 def warn(*message: str) -> None:
     """Print a warning message."""
-    print(f"{YELLOW}[WARN]{RESET} {message}")
+    print(f"{YELLOW}[WARN]{RESET} {' '.join(message)}")
 
 
 def error(*message: str) -> None:
     """Print an error message."""
-    print(f"{RED}[ERROR]{RESET} {message}", file=sys.stderr)
+    print(f"{RED}[ERROR]{RESET} {' '.join(message)}", file=sys.stderr)
 
 
 def section(*message: str) -> None:
     """Print a section heading."""
     print()
-    print(f"{BLUE}{BOLD}== {message} =={RESET}")
+    print(f"{BLUE}{BOLD}== {' '.join(message)} =={RESET}")
 
 
 # ============================================================================
@@ -357,12 +366,14 @@ def create_arch_rootfs() -> None:
     # --------------------------------------------------------------
 
     info(
-        "Installing minimal Arch userspace with pacstrap..."
+        "Installing Arch userspace with pacstrap..."
     )
+
+    all_packages = PACSTRAP_PACKAGES + EXTRA_PACKAGES
 
     info(
         "Packages: "
-        + " ".join(PACSTRAP_PACKAGES)
+        + " ".join(all_packages)
     )
 
     sudo(
@@ -370,7 +381,7 @@ def create_arch_rootfs() -> None:
             "pacstrap",
             "-K",
             str(ARCH_ROOT),
-            *PACSTRAP_PACKAGES,
+            *all_packages,
         ]
     )
 
@@ -1097,6 +1108,8 @@ def install_rootfs(
             "mkfs.ext2",
             "mount",
             "umount",
+            "pacstrap",
+            "rsync",
             "cp",
         ]
     )
